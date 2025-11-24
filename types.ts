@@ -14,15 +14,27 @@ export interface TargetElement {
   color?: string;
 }
 
+export type CursorType = 'dot' | 'crosshair' | 'ring' | 'pointer';
+
 export interface CursorConfig {
+  // Physics
   gravityRadius: number; 
-  gravityStrength: number; 
+  gravityStrength: number; // Deprecated in favor of snapStrength logic, kept for compat
+  cursorSpeed: number; // New: 0.1 to 0.9
+  snapStrength: number; // New: 0.1 to 0.9
+  
+  // Modes
   assistMode: boolean; 
   lockMode: boolean; 
-  showTrail: boolean;
   dwellEnabled: boolean; 
   dwellDelay: number; 
   autoDetect: boolean; 
+
+  // Visuals
+  showTrail: boolean;
+  visualFeedback: boolean;
+  cursorType: CursorType; // New
+  cursorSize: number; // New: 0.5 to 2.0
 }
 
 export interface LevelItem {
@@ -43,12 +55,23 @@ export interface Level {
   createdAt?: number;
 }
 
+export interface LevelStats {
+  attempts: number;
+  bestScore: number;
+  bestTime: number; // ms
+  lastPlayed: number;
+  accuracyHistory: number[]; // Store last 5 runs
+}
+
 export interface AppState {
   currentLevelId: string | number;
   score: number;
   clicks: number;
+  misses: number;
+  startTime: number;
   avgTimeBetweenClicks: number;
   history: { time: number; speed: number }[];
+  levelStats: Record<string | number, LevelStats>;
 }
 
 export interface GeneratedLayout {

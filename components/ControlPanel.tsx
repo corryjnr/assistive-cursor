@@ -1,8 +1,12 @@
 
 import React, { useState } from 'react';
 import { CursorConfig, Level } from '../types';
-import { Settings, BrainCircuit, Accessibility, Trash2, Play, Activity } from 'lucide-react';
-import { MIN_DWELL_DELAY, MAX_DWELL_DELAY } from '../constants';
+import { Settings, BrainCircuit, Accessibility, Trash2, Play, Activity, Sparkles, Sliders } from 'lucide-react';
+import { 
+    MIN_DWELL_DELAY, MAX_DWELL_DELAY, 
+    MIN_CURSOR_SPEED, MAX_CURSOR_SPEED, 
+    MIN_SNAP_STRENGTH, MAX_SNAP_STRENGTH 
+} from '../constants';
 
 interface ControlPanelProps {
   config: CursorConfig;
@@ -15,6 +19,7 @@ interface ControlPanelProps {
   onDeleteLevel: (id: string | number) => void;
   showAi: boolean;
   setShowAi: (show: boolean) => void;
+  onOpenSettings: () => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({ 
@@ -27,7 +32,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onSelectLevel,
   onDeleteLevel,
   showAi,
-  setShowAi
+  setShowAi,
+  onOpenSettings
 }) => {
   const [prompt, setPrompt] = useState('');
   const [activeTab, setActiveTab] = useState<'campaign' | 'custom'>('campaign');
@@ -37,8 +43,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     if (prompt.trim()) {
       onGenerate(prompt);
       setPrompt('');
-      // We don't close showAi here immediately so user can see context, 
-      // but the parent handles the success feedback and tab switching.
       setActiveTab('custom'); 
     }
   };
@@ -50,8 +54,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     <div className="w-full h-full flex flex-col overflow-hidden text-slate-300" data-neuro-target="false">
       
       {/* Header */}
-      <div className="p-5 pt-16 lg:pt-5 border-b border-slate-800 flex-shrink-0 bg-slate-950">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="p-5 pt-16 lg:pt-5 border-b border-slate-800 flex-shrink-0 bg-slate-950 flex items-center justify-between">
+        <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]">
             <BrainCircuit size={18} />
             </div>
@@ -66,6 +70,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
             </div>
         </div>
+        <button 
+            onClick={onOpenSettings}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            title="Full Settings"
+            data-neuro-target="true"
+        >
+            <Settings size={20} />
+        </button>
       </div>
 
       {/* Level Library */}
@@ -169,16 +181,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Physics Section */}
         <section>
             <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
-                <Settings size={12} /> Physics Engine
+                <Sliders size={12} /> Quick Tune
             </h2>
-            <div className="bg-slate-900 rounded-lg border border-slate-800 p-1 space-y-1">
-                <div className="flex items-center justify-between p-2">
+            <div className="bg-slate-900 rounded-lg border border-slate-800 p-1 space-y-3">
+                
+                {/* Magnetic Assist Toggle */}
+                <div className="flex items-center justify-between p-2 pb-0">
                     <label className="text-xs font-medium text-slate-300 flex items-center gap-2">Magnetic Assist</label>
                     <Toggle active={config.assistMode} onChange={() => setConfig(prev => ({ ...prev, assistMode: !prev.assistMode }))} />
                 </div>
-                <div className="px-3 pb-3 pt-1">
+
+                {/* Snap Radius Slider */}
+                <div className="px-3 pb-2">
                     <div className="flex justify-between text-[10px] mb-2 font-mono text-slate-500">
-                        <span>SNAP RADIUS</span>
+                        <span>RADIUS</span>
                         <span>{config.gravityRadius}px</span>
                     </div>
                     <input
@@ -188,33 +204,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                         data-neuro-target="true"
                     />
                 </div>
-            </div>
-        </section>
-
-        {/* Accessibility Section */}
-        <section>
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
-                <Accessibility size={12} /> Accessibility
-            </h2>
-            <div className="bg-slate-900 rounded-lg border border-slate-800 p-1 space-y-1">
-                 <div className="flex items-center justify-between p-2">
-                    <label className="text-xs font-medium text-slate-300 flex items-center gap-2">Dwell Click</label>
-                    <Toggle active={config.dwellEnabled} onChange={() => setConfig(prev => ({ ...prev, dwellEnabled: !prev.dwellEnabled }))} />
-                </div>
-                {config.dwellEnabled && (
-                    <div className="px-3 pb-3 pt-1 animate-in slide-in-from-top-1 fade-in">
-                        <div className="flex justify-between text-[10px] mb-2 font-mono text-slate-500">
-                            <span>DELAY</span>
-                            <span>{(config.dwellDelay / 1000).toFixed(1)}s</span>
-                        </div>
-                        <input
-                        type="range" min={MIN_DWELL_DELAY} max={MAX_DWELL_DELAY} step="100" value={config.dwellDelay}
-                        onChange={(e) => setConfig(prev => ({ ...prev, dwellDelay: Number(e.target.value) }))}
-                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                        data-neuro-target="true"
-                        />
-                    </div>
-                )}
             </div>
         </section>
 
@@ -254,7 +243,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       </div>
 
       <div className="p-2 border-t border-slate-800 text-center bg-slate-950">
-         <p className="text-[10px] text-slate-700 font-mono">v2.4.0_MASTERY</p>
+         <p className="text-[10px] text-slate-700 font-mono">v3.0.0_STABLE</p>
       </div>
     </div>
   );
@@ -262,7 +251,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
 const Toggle = ({ active, onChange, color = 'bg-blue-500' }: { active: boolean, onChange: () => void, color?: string }) => (
     <button
-        className={`w-9 h-5 rounded-full relative transition-colors duration-300 focus:outline-none ${active ? color : 'bg-slate-700'}`}
+        className={`w-9 h-5 rounded-full relative transition-colors duration-300 focus:outline-none flex-shrink-0 ${active ? color : 'bg-slate-700'}`}
         onClick={onChange}
         data-neuro-target="true"
     >

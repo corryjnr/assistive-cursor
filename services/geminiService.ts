@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { LayoutSchema, GeneratedLayout } from "../types";
 
@@ -16,6 +17,7 @@ export const generateLayout = async (prompt: string): Promise<GeneratedLayout | 
       contents: `Generate a UI layout for a simple point-and-click learning game. 
       The user request is: "${prompt}".
       Ensure items have distinct colors (hex codes or tailwind class names like 'bg-red-500').
+      Determine an appropriate 'gridCols' (number of columns, 1-5) based on the number of items.
       Mark only one item as 'isCorrect: true' if the prompt implies a question, otherwise mark all false.`,
       config: {
         responseMimeType: "application/json",

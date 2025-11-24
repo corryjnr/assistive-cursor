@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Mail, Bell, Search, Home, BarChart3, Users, Settings as SettingsIcon, Check } from 'lucide-react';
 
@@ -17,10 +18,10 @@ const RealWorldDemo: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 h-full bg-slate-50 overflow-y-auto overflow-x-hidden text-slate-800 font-sans relative">
+    <div className="flex-1 h-full bg-slate-50 overflow-y-auto overflow-x-hidden text-slate-800 font-sans relative pt-20 lg:pt-0">
       
       {/* Toast Container */}
-      <div className="fixed top-24 right-8 z-50 flex flex-col gap-2 pointer-events-none">
+      <div className="fixed top-24 right-4 md:right-8 z-50 flex flex-col gap-2 pointer-events-none">
           {toasts.map(t => (
               <div key={t.id} className="bg-slate-900 text-white px-4 py-2 rounded-lg shadow-xl flex items-center gap-2 animate-in slide-in-from-right fade-in duration-300">
                   <Check size={16} className="text-emerald-400" />
@@ -29,45 +30,47 @@ const RealWorldDemo: React.FC = () => {
           ))}
       </div>
 
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-4 md:p-8">
         
         {/* Header */}
-        <header className="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <div className="flex items-center gap-2">
+        <header className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-600/20">D</div>
             <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 w-full md:w-auto justify-end">
              <button onClick={() => handleClick("Search")} className="p-2.5 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 text-slate-600 transition-colors focus:ring-2 ring-blue-500/50">
                 <Search size={18} />
              </button>
              <button onClick={() => handleClick("Notifications")} className="p-2.5 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 text-slate-600 transition-colors focus:ring-2 ring-blue-500/50">
                 <Bell size={18} />
              </button>
-             <button onClick={() => handleClick("New Project")} className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg shadow-blue-600/20 hover:bg-blue-700 font-medium transition-colors text-sm active:scale-95 transform">
+             <button onClick={() => handleClick("New Project")} className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg shadow-blue-600/20 hover:bg-blue-700 font-medium transition-colors text-sm active:scale-95 transform whitespace-nowrap">
                 New Project
              </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           
           {/* Main Content Area */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="md:col-span-2 space-y-6 md:space-y-8">
             
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                     { label: 'Total Users', val: '1,234', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
                     { label: 'Revenue', val: '$42.5k', icon: BarChart3, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                     { label: 'Active Now', val: '321', icon: ActivityIcon, color: 'text-purple-600', bg: 'bg-purple-50' },
                 ].map((stat, i) => (
-                    <div key={i} onClick={() => handleClick(`View ${stat.label}`)} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition-all cursor-pointer active:scale-95">
-                        <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-lg flex items-center justify-center mb-3`}>
+                    <div key={i} onClick={() => handleClick(`View ${stat.label}`)} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition-all cursor-pointer active:scale-95 flex sm:block items-center justify-between">
+                        <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-lg flex items-center justify-center mb-0 sm:mb-3`}>
                             <stat.icon size={20} />
                         </div>
-                        <div className="text-2xl font-bold text-slate-900">{stat.val}</div>
-                        <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">{stat.label}</div>
+                        <div className="text-right sm:text-left">
+                            <div className="text-2xl font-bold text-slate-900">{stat.val}</div>
+                            <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">{stat.label}</div>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -79,7 +82,7 @@ const RealWorldDemo: React.FC = () => {
                     Contact Support
                 </h2>
                 <form onSubmit={(e) => { e.preventDefault(); handleClick("Send Message"); }} className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">First Name</label>
                             <input type="text" placeholder="Jane" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-sm" />
@@ -105,7 +108,7 @@ const RealWorldDemo: React.FC = () => {
           </div>
 
           {/* Sidebar Area */}
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
              <div onClick={() => handleClick("Inbox")} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition-colors cursor-pointer group active:scale-95">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">

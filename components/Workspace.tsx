@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { GeneratedLayout, CursorConfig } from '../types';
 
@@ -18,17 +19,19 @@ const Workspace: React.FC<WorkspaceProps> = ({ layout, config, onTargetClick, ac
   }, [config.lockMode, onTargetClick]);
 
   return (
-    <div className="flex-1 h-full relative overflow-hidden flex flex-col items-center justify-center p-12">
+    <div className="flex-1 h-full relative overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center p-4 md:p-12 scrollbar-hide">
       {/* Instructions */}
-      <div className="absolute top-24 text-center z-0 pointer-events-none">
-        <h2 className="text-4xl font-extrabold text-white mb-3 tracking-tight drop-shadow-lg">{layout.title}</h2>
-        <p className="text-lg text-slate-400 max-w-2xl bg-slate-900/50 px-4 py-1 rounded-full backdrop-blur-sm border border-slate-800">{layout.instruction}</p>
+      <div className="text-center z-10 pointer-events-none mb-8 mt-12 lg:mt-0">
+        <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-3 tracking-tight drop-shadow-lg">{layout.title}</h2>
+        <p className="text-sm md:text-lg text-slate-400 max-w-2xl bg-slate-900/50 px-4 py-1 rounded-full backdrop-blur-sm border border-slate-800 inline-block">{layout.instruction}</p>
       </div>
 
       {/* Grid of Targets */}
       <div 
-        className="grid gap-6 w-full max-w-5xl z-10 transition-all duration-500 ease-in-out"
-        style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+        className="grid w-full max-w-5xl z-10 transition-all duration-500 ease-in-out gap-3 md:gap-6 pb-20"
+        style={{ 
+            gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` 
+        }}
       >
         {layout.items.map((item) => {
           const isLocked = config.lockMode && !item.isCorrect;
@@ -42,7 +45,7 @@ const Workspace: React.FC<WorkspaceProps> = ({ layout, config, onTargetClick, ac
               data-neuro-locked={isLocked || isCompleted}
               disabled={isCompleted}
               className={`
-                aspect-[4/3] rounded-2xl flex flex-col items-center justify-center
+                aspect-[4/3] rounded-xl md:rounded-2xl flex flex-col items-center justify-center
                 shadow-lg transition-all duration-300 transform relative overflow-hidden group
                 ${item.color.startsWith('bg-') ? item.color : 'bg-slate-800'}
                 ${isLocked ? 'opacity-20 grayscale cursor-not-allowed scale-95' : 'hover:scale-[1.02] active:scale-95 opacity-100'}
@@ -52,7 +55,7 @@ const Workspace: React.FC<WorkspaceProps> = ({ layout, config, onTargetClick, ac
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              <span className="text-2xl font-bold text-white drop-shadow-md pointer-events-none z-10">
+              <span className="text-xl md:text-2xl font-bold text-white drop-shadow-md pointer-events-none z-10">
                 {isCompleted ? '✓' : item.label}
               </span>
               

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useCallback } from 'react';
 import { CursorConfig } from '../types';
 import { lerp, getDistance, clamp } from '../utils/math';
@@ -34,6 +35,9 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
   const requestRef = useRef<number>(0);
 
   const updateTargetCache = useCallback(() => {
+    // Safety check for server-side or non-DOM envs
+    if (typeof document === 'undefined') return;
+
     const explicitElements = Array.from(document.querySelectorAll('[data-neuro-target="true"]')) as HTMLElement[];
     let allElements = explicitElements;
 
@@ -43,6 +47,9 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
     }
 
     targetsRef.current = allElements.map((el) => {
+      // Ensure element is actually connected to DOM before measuring
+      if (!document.body.contains(el)) return null;
+
       const rect = el.getBoundingClientRect();
       const isExplicit = el.getAttribute('data-neuro-target') === 'true';
       return {
@@ -53,20 +60,24 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
         radius: Math.max(rect.width, rect.height) / 2 + (isExplicit ? 0 : 5), 
         locked: el.getAttribute('data-neuro-locked') === 'true'
       };
-    });
+    }).filter((t): t is TargetCache => t !== null);
   }, [config.autoDetect]);
 
   useEffect(() => {
     updateTargetCache();
     window.addEventListener('resize', updateTargetCache);
     window.addEventListener('scroll', updateTargetCache, true);
+    window.addEventListener('transitionend', updateTargetCache); // Catch layout shifts from transitions
     
     const observer = new MutationObserver(updateTargetCache);
-    observer.observe(document.body, { childList: true, subtree: true });
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+    }
 
     return () => {
       window.removeEventListener('resize', updateTargetCache);
       window.removeEventListener('scroll', updateTargetCache, true);
+      window.removeEventListener('transitionend', updateTargetCache);
       observer.disconnect();
     };
   }, [updateTargetCache, layoutVersion]);
@@ -80,6 +91,10 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
       if (!config.assistMode || !activeTargetRef.current) return;
 
       const target = activeTargetRef.current;
+      
+      // Safety check: ensure element still exists
+      if (!target.el || !document.body.contains(target.el)) return;
+
       const dist = getDistance(e.clientX, e.clientY, target.centerX, target.centerY);
 
       // Gravity Assist Click Logic
@@ -121,6 +136,9 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
       let closestDist = Infinity;
       
       for (const target of targetsRef.current) {
+        // Double check existence to avoid stale cache issues during rapid navigation
+        if (!target.el || !document.body.contains(target.el)) continue;
+
         if (config.lockMode && target.locked) continue;
         const dist = getDistance(targetX, targetY, target.centerX, target.centerY);
         
@@ -136,14 +154,19 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
         isSnapped = true;
         
         if (activeTargetRef.current !== bestTarget) {
-            if (activeTargetRef.current) activeTargetRef.current.el.style.transform = '';
+            if (activeTargetRef.current && activeTargetRef.current.el && document.body.contains(activeTargetRef.current.el)) {
+                 activeTargetRef.current.el.style.transform = '';
+            }
+            
             // Only scale game targets, generic elements shouldn't pop as much
             if (bestTarget.el.getAttribute('data-neuro-target') === 'true') {
                  bestTarget.el.style.transform = 'scale(1.05)';
             }
         }
       } else {
-        if (activeTargetRef.current) activeTargetRef.current.el.style.transform = '';
+        if (activeTargetRef.current && activeTargetRef.current.el && document.body.contains(activeTargetRef.current.el)) {
+            activeTargetRef.current.el.style.transform = '';
+        }
       }
     }
 
@@ -173,7 +196,7 @@ const SmartCursor: React.FC<SmartCursorProps> = ({ config, layoutVersion, isClic
         return;
     }
 
-    if (isSnapped && target) {
+    if (isSnapped && target && target.el && document.body.contains(target.el)) {
         if (!isDwelling.current) {
             isDwelling.current = true;
             dwellStartTime.current = Date.now();

@@ -1,8 +1,10 @@
+
 import { Level } from './types';
 
 export const DEFAULT_GRAVITY_RADIUS = 80;
 export const MAX_GRAVITY_RADIUS = 200;
 export const DEFAULT_GRAVITY_STRENGTH = 0.3;
+export const STORAGE_KEY_CUSTOM_LEVELS = 'neuro_custom_levels_v1';
 
 // Tuned for better responsiveness
 export const CURSOR_SMOOTHING = 0.45; // 0.15 was too laggy
